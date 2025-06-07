@@ -1,0 +1,6 @@
+# comment
+x :int32 = 55;
+
+fn some :int32 = (a :int32, b :int32) {
+    e :int32 = a * b + x;
+}
