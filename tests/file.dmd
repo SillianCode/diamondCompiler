@@ -1,6 +1,9 @@
-# comment
-x :int32 = 55;
+fn main :int32 = () {
+    d :int32 = 1 + 2;
+    out d;
+}
 
-fn some :int32 = (a :int32, b :int32) {
-    e :int32 = a * b + x;
+
+fn add :int32 = (a :int32, b :int32) {
+    c :int32 = a + b * 2;
 }

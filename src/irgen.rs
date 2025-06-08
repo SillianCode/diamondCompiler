@@ -1,3 +1,5 @@
+
+
 // irgen.rs
 
 use crate::parser::{Program, Expr, Stmt, Param};
@@ -132,6 +134,96 @@ impl IRGen {
         }
     }
 
+    fn gen_expr_in_rax(&mut self, expr: &Expr) -> IRType {
+        use Expr::*;
+        match expr {
+            Number { val, typ } => {
+                let ir_typ = match typ {
+                    crate::parser::Type::Int32 => IRType::Int32,
+                    crate::parser::Type::Int64 => IRType::Int64,
+                    crate::parser::Type::DStr => IRType::DStr,
+                    crate::parser::Type::SStr => IRType::SStr,
+                };
+                self.instrs.push(IRInstr::LoadConst {
+                    dest: "rax".to_string(),
+                    value: *val as i64,
+                    typ: ir_typ.clone(),
+                });
+                ir_typ
+            }
+
+            Variable(name) => {
+                let var_typ = self.var_types.get(name).expect("Unbekannte Variable").clone();
+                self.instrs.push(IRInstr::LoadVar {
+                    dest: "rax".to_string(),
+                    name: name.clone(),
+                    typ: var_typ.clone(),
+                });
+                var_typ
+            }
+
+            BinaryOp { left, op, right } => {
+                // Links in rax laden
+                let left_typ = self.gen_expr_in_rax(left);
+                let (right_reg, right_typ) = self.gen_expr(right);
+
+                if left_typ != right_typ {
+                    panic!("Typfehler in Binäroperation: {:?} vs {:?}", left_typ, right_typ);
+                }
+
+                match op {
+                    Token::Plus => {
+                        self.instrs.push(IRInstr::Add {
+                            dest: "rax".to_string(),
+                            lhs: "rax".to_string(),
+                            rhs: right_reg.clone(),
+                            typ: left_typ.clone(),
+                        });
+                    }
+                    Token::Minus => {
+                        self.instrs.push(IRInstr::Sub {
+                            dest: "rax".to_string(),
+                            lhs: "rax".to_string(),
+                            rhs: right_reg.clone(),
+                            typ: left_typ.clone(),
+                        });
+                    }
+                    Token::Asterisk => {
+                        self.instrs.push(IRInstr::Mul {
+                            dest: "rax".to_string(),
+                            lhs: "rax".to_string(),
+                            rhs: right_reg.clone(),
+                            typ: left_typ.clone(),
+                        });
+                    }
+                    Token::Slash => {
+                        // Hier besonders: Division nutzt rax & rdx
+                        self.instrs.push(IRInstr::Div {
+                            dest: "rax".to_string(),
+                            lhs: "rax".to_string(),
+                            rhs: right_reg.clone(),
+                            typ: left_typ.clone(),
+                        });
+                    }
+                    _ => panic!("Nicht unterstützter Binäroperator: {:?}", op),
+                }
+
+                self.release_temp(&right_reg);
+
+                left_typ
+            }
+
+            DoubleQuotedString(s) => {
+                // Annahme: string direkt in rax laden
+                self.instrs.push(IRInstr::LoadString {
+                    dest: "rax".to_string(),
+                    value: s.clone(),
+                });
+                IRType::DStr
+            }
+        }
+    }
+
     fn release_temp(&mut self, name: &str) {
         if name.starts_with("r") {
             self.free_temps.push(name.to_string());
@@ -176,41 +268,45 @@ impl IRGen {
                     name: name.clone(),
                 });
 
-                // Label am Anfang der Funktion (z. B. für Call-Ziele oder Klarheit)
-                self.instrs.push(IRInstr::Label {
-                    name: format!("{}_entry", name),
-                });
 
-                // Parameter als Variablen speichern
-                for Param {name, typ} in params {
+                let mut p_count = 0;
+                for Param { name: param_name, typ } in params {
                     let ir_type = match typ {
                         crate::parser::Type::Int32 => IRType::Int32,
                         crate::parser::Type::Int64 => IRType::Int64,
-                        crate::parser::Type::DStr => IRType::DStr,
-                        crate::parser::Type::SStr => IRType::SStr,
+                        crate::parser::Type::DStr  => IRType::DStr,
+                        crate::parser::Type::SStr  => IRType::SStr,
                     };
 
-                    self.var_types.insert(name.clone(), ir_type.clone());
 
-                    // Typischerweise kommt hier `LoadParam`, aber wenn du keine extra Instruktion hast:
-                    self.instrs.push(IRInstr::LoadVar {
-                        dest: name.clone(), // direkt mit Namen
-                        name: name.clone(),
-                        typ: ir_type,
-                    });
+                    let reg = match p_count {
+                        0 => "rdi",
+                        1 => "rsi",
+                        2 => "rdx",
+                        3 => "rcx",
+                        4 => "r8",
+                        5 => "r9",
+                        _ => panic!("not implemented: more than 6 function params"),
+                    };
+
+                    self.loaded_vars.insert(param_name.clone(), reg.to_string());
+                    self.var_types.insert(param_name.clone(), ir_type.clone());
+
+                    p_count += 1;
                 }
 
-                // Funktionstatements generieren
                 for stmt in body {
                     self.gen_stmt(stmt);
                 }
 
                 self.instrs.push(IRInstr::FuncEnd);
+                self.loaded_vars.clear();
             }
-
+            Stmt::OutStmt(expr) => {
+                self.gen_expr_in_rax(expr);
+            }
         }
     }
-
 
     pub fn ir_gen(&mut self, program: &Program) -> IRProgram {
         for stmt in &program.statements {
@@ -221,6 +317,4 @@ impl IRGen {
             instructions: self.instrs.clone(),
         }
     }
-
-
 }

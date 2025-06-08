@@ -34,7 +34,6 @@ impl std::fmt::Display for IRInstr {
             IRInstr::Sub { dest, lhs, rhs, typ }     => write!(f, "({}) {} = sub {}, {}", typ, dest, lhs, rhs),
             IRInstr::Store { name, src, typ }        => write!(f, "({}) store {}, {}", typ, name, src),
             IRInstr::FuncBegin { name } => write!(f, "FUNC: {}", name),
-            IRInstr::Label { name } => write!(f, "{}", name),
             IRInstr::FuncEnd => write!(f, "END_FUNC"),
         }
     }

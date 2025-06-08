@@ -36,6 +36,7 @@ pub enum Stmt {
         return_type: Type,
         body: Vec<Stmt>,
     },
+    OutStmt(Expr),
     /*
     FunctionCall {
         name: String,
@@ -204,6 +205,10 @@ impl Parser {
                 Expr::DoubleQuotedString(s)
             }
 
+            Some(Token::Semicolon) => {
+                panic!("Semicolon!");
+            }
+
             _ => {
                 return Err("Erwartet Zahl, Variable oder '('".into());
             }
@@ -242,7 +247,6 @@ impl Parser {
         let name = match self.current_token().cloned() {
             Some(Token::Identifier(n)) => {
                 self.advance();
-                println!("n: {:?}", n);
                 n
             }
             _ => return Err("Erwartet Funktionsnamen".into()),
@@ -339,6 +343,24 @@ impl Parser {
                 Token::Identifier(_) => {
                     let decl = self.parse_var_decl()?;
                     body.push(Stmt::VarDecl(decl));
+                }
+                Token::Keyword(k) => match k.as_str() {
+                    "fn" => {
+                        let func = self.parse_function_def()?;
+                        body.push(func);
+                    }
+                    "out" => {
+                        self.advance();
+                        let expr = self.parse_expression(None)?;
+                        body.push(Stmt::OutStmt(expr));
+
+                        if !self.expect(&Token::Semicolon) {
+                            return Err("Erwartet ';'".into());
+                        }
+                    }
+                    _ => { 
+                        panic!("unexpected keyword '{}'", k);
+                    }
                 }
                 _ => {
                     let expr = self.parse_expression(None)?;

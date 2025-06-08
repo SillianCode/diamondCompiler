@@ -73,6 +73,9 @@ fn optimize_stmt(stmt: &Stmt) -> Stmt {
                 body,
             }
         }
+        Stmt::OutStmt(expr) => {
+            Stmt::OutStmt(optimize_expr(expr))
+        }
     }
 }
 

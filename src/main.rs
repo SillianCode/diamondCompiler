@@ -25,7 +25,7 @@ fn main() -> std::io::Result<()> {
     let mut tokens = Vec::new();
     loop {
         let token = lexer.next_token();
-        //println!("{:?}", token.clone());
+        println!("{:?}", token.clone());
         tokens.push(token.clone());
         if token == Token::EOF {
             break;
@@ -38,7 +38,7 @@ fn main() -> std::io::Result<()> {
         Ok(program) => {
             // optimize programm
             let opt = optimize_program(&program);
-            //println!("Optimized Program: {:#?}", opt);
+            println!("Optimized Program: {:#?}", opt);
 
             //check types and variables
             let mut typechecker = TypeChecker::new();

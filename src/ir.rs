@@ -18,7 +18,6 @@ pub enum IRInstr {
     Store     { name: String, src: String, typ: IRType },
     FuncBegin { name: String },
     FuncEnd,
-    Label { name: String },
 }
 
 #[derive(Debug)]

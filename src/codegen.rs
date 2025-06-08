@@ -32,6 +32,8 @@ impl Codegen {
         writeln!(file, "\nsection .text")?;
         writeln!(file, "global _start")?;
         writeln!(file, "_start:")?;
+        writeln!(file, "    call main")?;
+        writeln!(file, "    jmp exit")?;
 
         for instr in &ir.instructions {
             match instr {
@@ -69,13 +71,21 @@ impl Codegen {
                     // vorerst überspringen – Stringhandling = next step
                     // du kannst hier später String-Konstanten verwalten
                 }
-                IRInstr::FuncBegin { .. } => {}
-                IRInstr::FuncEnd { .. } => {}
-                IRInstr::Label { .. } => {}
+                IRInstr::FuncBegin { name } => {
+                    writeln!(file, "{}:", name)?;
+                    writeln!(file, "    push rbp    ;save caller")?;
+                    writeln!(file, "    mov rbp, rsp    ; own base_ptr")?;
+                }
+                IRInstr::FuncEnd => {
+                    writeln!(file, "    mov rsp, rbp    ; aufräumen")?;
+                    writeln!(file, "    pop rbp")?;
+                    writeln!(file, "    ret")?;
+                }
             }
         }
 
         // Exit syscall
+        writeln!(file, "exit:")?;
         writeln!(file, "    mov rax, 60")?;
         writeln!(file, "    xor rdi, rdi")?;
         writeln!(file, "    syscall")?;
@@ -103,6 +113,15 @@ fn reg<'a>(name: &'a str, typ: &'a IRType) -> &'a str {
         ("rax", IRType::Int64) => "rax",
         ("cqo", IRType::Int32) => "cdq",
         ("cqo", IRType::Int64) => "cqo",
+        //
+        ("rdi", IRType::Int32) => "edi",
+        ("rdi", IRType::Int64) => "rdi",
+        ("rsi", IRType::Int32) => "esi",
+        ("rsi", IRType::Int64) => "rsi",
+        ("rdx", IRType::Int32) => "edx",
+        ("rdx", IRType::Int64) => "rdx",
+        ("rcx", IRType::Int32) => "ecx",
+        ("rcx", IRType::Int64) => "rcx",
         _ => panic!("No Registers left or unknown type: '{:?}'", name),
     }
 }

@@ -3,18 +3,23 @@ use crate::parser::{Expr, Stmt, VarDecl, Program, Type};
 
 pub struct TypeChecker {
     symbols: HashMap<String, Type>,
+    entry: bool,
 }
 
 impl TypeChecker {
     pub fn new() -> Self {
         TypeChecker {
             symbols: HashMap::new(),
+            entry: false,
         }
     }
 
     pub fn check_program(&mut self, program: &Program) -> Result<(), String> {
         for stmt in &program.statements {
             self.check_stmt(stmt)?;
+        }
+        if self.entry == false {
+            panic!("No function called 'main' found.");
         }
         Ok(())
     }
@@ -27,6 +32,10 @@ impl TypeChecker {
                 Ok(())
             }
             Stmt::FunctionDef { name, params, return_type, body } => {
+                if name == "main" {
+                    self.entry = true;
+                }
+
                 if self.symbols.contains_key(name) {
                     return Err(format!("Funktion '{}' wurde bereits definiert", name));
                 }
@@ -39,10 +48,15 @@ impl TypeChecker {
                     local.symbols.insert(param.name.clone(), param.typ.clone());
                 }
 
+                //nicht nur local, globale vars??
                 for stmt in body {
                     local.check_stmt(stmt)?;
                 }
 
+                Ok(())
+            }
+            Stmt::OutStmt(expr) => {
+                self.check_expr(expr)?;
                 Ok(())
             }
         }
