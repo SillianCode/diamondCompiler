@@ -14,9 +14,8 @@ pub struct IRGen {
     free_temps: Vec<String>,
     loaded_vars: HashMap<String, String>,
     var_types: HashMap<String, IRType>,
+    func_types: HashMap<String, IRType>,
 }
-
-
 
 impl IRGen {
     pub fn new() -> Self {
@@ -26,6 +25,7 @@ impl IRGen {
             free_temps: Vec::new(),
             loaded_vars: HashMap::new(),
             var_types: HashMap::new(),
+            func_types: HashMap::new(),
         }
     }
 
@@ -131,6 +131,56 @@ impl IRGen {
                 });
                 (temp, IRType::DStr)
             }
+
+            FunctionCall { name, args } => {
+                // Argumente auswerten und Registernamen sammeln
+                let mut arg_regs = Vec::new();
+
+                let mut p_count = 0;
+                for arg in args {
+                    let (reg, typ) = self.gen_expr(arg);
+                    let register = match p_count {
+                        0 => "rdi",
+                        1 => "rsi",
+                        2 => "rdx",
+                        3 => "rcx",
+                        4 => "r8",
+                        5 => "r9",
+                        _ => panic!("not implemented: calling more than 6 function params"),
+                    };
+                    arg_regs.push(register.to_string());
+                    self.instrs.push(IRInstr::MovReg {
+                        dest: register.to_string(),
+                        src: reg.clone(),
+                        typ: typ.clone(),
+                    });
+                    self.release_temp(&reg);
+                    p_count += 1;
+                }
+
+                // Funktionsaufruf mit Argumenten
+                self.instrs.push(IRInstr::FuncCall {
+                    name: name.clone(),
+                    regs: arg_regs,
+                });
+
+                // Rückgabetyp bestimmen
+                let ret_type = self.func_types.get(name)
+                    .unwrap_or_else(|| panic!("Rückgabetyp der Funktion '{}' unbekannt", name))
+                    .clone();
+
+                // Rückgabe aus `rax` holen und in temporären Wert speichern
+                let dest = self.fresh_temp();
+
+                self.instrs.push(IRInstr::MovReg {
+                    dest: dest.clone(),
+                    src: "rax".to_string(),
+                    typ: ret_type.clone(),
+                });
+
+                (dest, ret_type)
+            }
+
         }
     }
 
@@ -197,7 +247,7 @@ impl IRGen {
                         });
                     }
                     Token::Slash => {
-                        // Hier besonders: Division nutzt rax & rdx
+                        // [!] Div nutzt rax & rdx
                         self.instrs.push(IRInstr::Div {
                             dest: "rax".to_string(),
                             lhs: "rax".to_string(),
@@ -214,13 +264,18 @@ impl IRGen {
             }
 
             DoubleQuotedString(s) => {
-                // Annahme: string direkt in rax laden
+                // FIXME: string ist immer in rax
                 self.instrs.push(IRInstr::LoadString {
                     dest: "rax".to_string(),
                     value: s.clone(),
                 });
                 IRType::DStr
             }
+
+            FunctionCall { name, args } => {
+                todo!();
+            }
+
         }
     }
 
@@ -267,6 +322,13 @@ impl IRGen {
                 self.instrs.push(IRInstr::FuncBegin {
                     name: name.clone(),
                 });
+                let ret_type = match return_type {
+                    crate::parser::Type::Int32 => IRType::Int32,
+                    crate::parser::Type::Int64 => IRType::Int64,
+                    crate::parser::Type::DStr  => IRType::DStr,
+                    crate::parser::Type::SStr  => IRType::SStr,
+                };
+                self.func_types.insert(name.clone(), ret_type);
 
 
                 let mut p_count = 0;
@@ -299,7 +361,7 @@ impl IRGen {
                     self.gen_stmt(stmt);
                 }
 
-                self.instrs.push(IRInstr::FuncEnd);
+                self.instrs.push(IRInstr::FuncEnd { name: name.to_string() });
                 self.loaded_vars.clear();
             }
             Stmt::OutStmt(expr) => {

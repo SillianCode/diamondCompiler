@@ -34,7 +34,18 @@ impl std::fmt::Display for IRInstr {
             IRInstr::Sub { dest, lhs, rhs, typ }     => write!(f, "({}) {} = sub {}, {}", typ, dest, lhs, rhs),
             IRInstr::Store { name, src, typ }        => write!(f, "({}) store {}, {}", typ, name, src),
             IRInstr::FuncBegin { name } => write!(f, "FUNC: {}", name),
-            IRInstr::FuncEnd => write!(f, "END_FUNC"),
+            IRInstr::FuncEnd { name } => write!(f, "END_FUNC: {}", name),
+            IRInstr::FuncCall { name, regs } => {
+                write!(f, "call {}(", name)?;
+                let arg_list = regs.iter()
+                                .map(|a| format!("{:?}", a))
+                                .collect::<Vec<_>>()
+                                .join(", ");
+                write!(f, "{})", arg_list)
+            },
+            IRInstr::MovReg { dest, src, typ } => {
+                write!(f, "({}) {} =  %{}", typ, dest, src)
+            }
         }
     }
 }

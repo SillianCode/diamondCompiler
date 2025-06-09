@@ -1,10 +1,10 @@
 use crate::parser::{Expr, Program, Stmt, VarDecl};
-use crate::parser::Expr::{BinaryOp, Number, Variable, DoubleQuotedString};
+use crate::parser::Expr::{BinaryOp, Number, Variable, DoubleQuotedString, FunctionCall};
 use crate::lexer::Token;
 
 fn optimize_expr(expr: &Expr) -> Expr {
     match expr {
-        Number { val: _, typ: _ } | Variable(_) | DoubleQuotedString(_) => expr.clone(),
+        Number { val: _, typ: _ } | Variable(_) | DoubleQuotedString(_) | FunctionCall { name: _, args: _} => expr.clone(),
 
         BinaryOp { left, op, right } => {
             let left = optimize_expr(left);

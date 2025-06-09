@@ -17,7 +17,9 @@ pub enum IRInstr {
     Sub       { dest: String, lhs: String, rhs: String, typ: IRType },
     Store     { name: String, src: String, typ: IRType },
     FuncBegin { name: String },
-    FuncEnd,
+    FuncEnd { name: String },
+    FuncCall { name: String, regs: Vec<String> },
+    MovReg { dest: String, src: String, typ: IRType },
 }
 
 #[derive(Debug)]

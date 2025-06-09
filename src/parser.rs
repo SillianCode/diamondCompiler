@@ -24,6 +24,10 @@ pub enum Expr {
         right: Box<Expr>,
     },
     DoubleQuotedString(String),
+    FunctionCall {
+        name: String,
+        args: Vec<Expr>,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -37,12 +41,6 @@ pub enum Stmt {
         body: Vec<Stmt>,
     },
     OutStmt(Expr),
-    /*
-    FunctionCall {
-        name: String,
-        args: Vec<Expr>,
-    },
-    */
 }
 
 
@@ -111,8 +109,9 @@ impl Parser {
                     statements.push(func);
                 }
                 _ => {
-                    let decl = self.parse_var_decl()?;
-                    statements.push(Stmt::VarDecl(decl));
+                    panic!("no global code other than functions allowed!");
+                    //let decl = self.parse_var_decl()?;
+                    //statements.push(Stmt::VarDecl(decl));
                 }
             }
         }
@@ -205,8 +204,11 @@ impl Parser {
                 Expr::DoubleQuotedString(s)
             }
 
-            Some(Token::Semicolon) => {
-                panic!("Semicolon!");
+            Some(Token::Bang) => {
+                // FnCall
+                self.advance();
+                let fnCall = self.parse_function_call()?;
+                fnCall
             }
 
             _ => {
@@ -377,7 +379,52 @@ impl Parser {
         })
     }
 
+    fn parse_function_call(&mut self) -> Result<Expr, String> {
+        // ident(expr, ...?)
+        let name = match self.current_token().cloned() {
+            Some(Token::Identifier(n)) => {
+                self.advance();
+                n
+            }
+            _ => return Err("Erwartet Funktionsnamen".into()),
+        };
 
-    
+        if !self.expect(&Token::LParen) {
+            return Err("Erwartet '(' nach Funktionsnamen".into());
+        }
+
+        let mut args = Vec::new();
+
+        // no params => ()
+        if let Some(token) = self.current_token().cloned() {
+            if token == Token::RParen {
+                self.advance();
+                return Ok(Expr::FunctionCall { name, args });
+            }
+        }
+
+        // mind. 1 arg
+        loop {
+            let expr = self.parse_expression(None)?;
+            args.push(expr);
+
+            match self.current_token().cloned() {
+                Some(Token::Comma) => {
+                    self.advance();
+                }
+                Some(Token::RParen) => {
+                    self.advance();
+                    break;
+                }
+                _ => {
+                    return Err("Erwartet ',' oder ')' in Funktionsaufruf".into());
+                }
+            }
+        }
+
+        Ok(Expr::FunctionCall { name, args })
+    }
+
+
 
 }

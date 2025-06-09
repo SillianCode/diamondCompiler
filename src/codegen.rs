@@ -76,18 +76,25 @@ impl Codegen {
                     writeln!(file, "    push rbp    ;save caller")?;
                     writeln!(file, "    mov rbp, rsp    ; own base_ptr")?;
                 }
-                IRInstr::FuncEnd => {
+                IRInstr::FuncEnd { name } => {
                     writeln!(file, "    mov rsp, rbp    ; aufräumen")?;
                     writeln!(file, "    pop rbp")?;
                     writeln!(file, "    ret")?;
+                }
+                IRInstr::FuncCall {name, regs: _} => {
+                    writeln!(file, "    call {}", name)?;
+                }
+                IRInstr::MovReg { dest, src, typ } => {
+                    writeln!(file, "    mov {}, {}", reg(dest, typ), reg(src, typ))?;
                 }
             }
         }
 
         // Exit syscall
         writeln!(file, "exit:")?;
+        writeln!(file, "    mov rdi, rax")?;
         writeln!(file, "    mov rax, 60")?;
-        writeln!(file, "    xor rdi, rdi")?;
+        //writeln!(file, "    xor rdi, rdi")?;
         writeln!(file, "    syscall")?;
 
         Ok(())
