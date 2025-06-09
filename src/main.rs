@@ -18,14 +18,16 @@ use codegen::Codegen;
 
 
 fn main() -> std::io::Result<()> {
+    println!("Loading file...");
     let filename = "tests/file.dmd";
     let input = read_file_to_string(filename)?;
     let mut lexer = Lexer::new(&input);
 
+    println!("Lexing...");
     let mut tokens = Vec::new();
     loop {
         let token = lexer.next_token();
-        println!("{:?}", token.clone());
+        //println!("{:?}", token.clone());
         tokens.push(token.clone());
         if token == Token::EOF {
             break;
@@ -33,18 +35,20 @@ fn main() -> std::io::Result<()> {
     }
 
     let mut parser = Parser::new(tokens);
-
+    println!("Parsing...");
     match parser.parse_program() {
         Ok(program) => {
             // optimize programm
+            println!("Optimizing...");
             let opt = optimize_program(&program);
-            println!("Optimized Program: {:#?}", opt);
+            //println!("Optimized Program: {:#?}", opt);
 
             //check types and variables
+            println!("Checking types...");
             let mut typechecker = TypeChecker::new();
             match typechecker.check_program(&program) {
-                Ok(_) => println!("Typecheck erfolgreich!"),
-                Err(e) => println!("Typecheck Fehler: {}", e),
+                Ok(_) => println!("Finished!"),
+                Err(e) => panic!("Typecheck Fehler: {}", e),
             }
 
             // IR generieren
@@ -56,7 +60,7 @@ fn main() -> std::io::Result<()> {
             write_ir_to_file(outp_file, &ir_program);
 
             // Ausgabe zur Kontrolle
-            println!("{:#?}", ir_program);
+            //println!("{:#?}", ir_program);
 
             let codegen = Codegen::new();
             codegen.generate(&ir_program, "out/output.asm").expect("ASM generation failed");

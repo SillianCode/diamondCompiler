@@ -1,4 +1,4 @@
-fn add :int32 = (a :int32, b :int32) {
+fn add :int32 = (a, b) {
     c :int32 = a + b * 2;
     out c;
 }

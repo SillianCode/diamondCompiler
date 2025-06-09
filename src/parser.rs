@@ -258,18 +258,19 @@ impl Parser {
             return Err("Erwartet ':'".into());
         }
 
-        let return_type = match self.current_token().cloned() {
+        let (return_type_str, return_type) = match self.current_token().cloned() {
             Some(Token::Keyword(t)) => {
                 self.advance();
                 match t.as_str() {
-                    "int32" => Type::Int32,
-                    "int64" => Type::Int64,
-                    "str" => Type::DStr,
+                    "int32" => ("int32".to_string(), Type::Int32),
+                    "int64" => ("int64".to_string(), Type::Int64),
+                    "str" => ("str".to_string(), Type::DStr),
                     _ => return Err(format!("Unbekannter Rückgabetyp: {}", t)),
                 }
             }
             _ => return Err("Erwartet Rückgabetyp".into()),
         };
+
 
         if !self.expect(&Token::Equal) {
             return Err("Erwartet '='".into());
@@ -290,16 +291,30 @@ impl Parser {
                         return Err("Erwartet Parametername".into());
                     };
 
-                    if !self.expect(&Token::Colon) {
-                        return Err("Erwartet ':' nach Parameternamen".into());
-                    }
-
+                    // either ':' or ',' or ')'
                     let param_type_str = match self.current_token().cloned() {
-                        Some(Token::Keyword(t)) => {
+                        Some(Token::Colon) => {
                             self.advance();
-                            t
+                            let tkn_type = match self.current_token().cloned() {
+                                Some(Token::Keyword(t)) => {
+                                    self.advance();
+                                    t
+                                }
+                                _ => return Err("Erwartet Parametertyp".into()),
+                            };
+                            tkn_type
                         }
-                        _ => return Err("Erwartet Parametertyp".into()),
+                        Some(Token::Comma) => {
+                            // assume it has the same type as the func
+                            return_type_str.clone()
+                        }
+                        Some(Token::RParen) => {
+                            // this case is handled later on in this fn
+                            return_type_str.clone()
+                        }
+                        _ => {
+                            panic!("Error_parsing_FuncDecl: '{:?}'", self.current_token().cloned());
+                        }
                     };
 
                     let param_type = match param_type_str.as_str() {
