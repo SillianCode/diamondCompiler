@@ -27,11 +27,6 @@ Examples are in the *tests* folder.
 # union
 type t = some(int) | none(int);
 ```
-and 
-```diamond
-# records
-type t = { a :int, b :int } 
-```
 
 * Module and Namespaces:
 ```diamond
@@ -43,30 +38,41 @@ namespace Algebra {
     # Here is defined namespace
 }
 ```
+
 * Each file starts with it's Modulname:
 ```diamond
+# e.g. in directory Math/Geometry.dmd
 module Math.Geometry
 ```
-In Verzeichnis Math/Geometry.dmd
-Packages mit 
+
+* Packages with
+```diamond
 import package_name.module
-packagemanager “dimp”?
-Generische Funktionen
+```
+-> packagemanager “dimp”?
+
+* Generic functions
+```diamond
 fn identity<T> : T = (val : T) {
     out val;
 }
+```
 
-Interface mit Default-Implementierung
+*Interface with Default-Implementation
+```diamond
 interface Printable {
     fn println : void = () {
         print("Printable");
     }
 }
+```
 
-Components implementieren Interfaces
+* Components combine fields and methods
+
+* Components implement Interfaces
 Comp Document implements Printable {
     fn println : void = () {
         print("overridden");
     }
 }
-Component = Felder und Methoden
+
