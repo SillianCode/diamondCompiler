@@ -32,7 +32,7 @@ type t = some(int) | none(int);
 ```diamond
 use Math.Geometry as Geo;
 ```
-Und
+and
 ```diamond
 namespace Algebra {
     # Here is defined namespace
