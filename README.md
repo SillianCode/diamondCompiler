@@ -67,7 +67,16 @@ interface Printable {
 }
 ```
 
-* Components combine fields and methods
+* Records/structs holding data
+```diamond
+struct rect {
+    width :int32,
+    height :int32
+}
+```
+
+
+* Components combine fields and methods, but are not accessable from outside itself (structs can).
 
 * Components implement Interfaces
 ```diamond
