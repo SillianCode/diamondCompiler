@@ -22,7 +22,16 @@ Examples are in the *tests* folder.
 * Parallelität durch async/await nur Zugriff auf immutable.
 * Pattern matching
 * Option types
-* define types with  $ some(int) | none(int) $ and { a :int, b :int } [Unions/variants, Records,structs; in diamond beides type]
+* define types with 
+```diamond
+# union
+type t = some(int) | none(int);
+```
+and 
+```diamond
+# records
+type t = { a :int, b :int } 
+```
 Module und Namespaces:
     use Math.Geometry as Geo;
 Und
