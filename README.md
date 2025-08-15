@@ -19,7 +19,7 @@ Examples are in the *tests* folder.
 
 ## later on
 
-* Parallelität durch async/await nur Zugriff auf immutable.
+* async/await (just on immutable data)
 * Pattern matching
 * Option types
 * define types with 
@@ -32,14 +32,21 @@ and
 # records
 type t = { a :int, b :int } 
 ```
-Module und Namespaces:
-    use Math.Geometry as Geo;
+
+* Module and Namespaces:
+```diamond
+use Math.Geometry as Geo;
+```
 Und
-    namespace Algebra {
-        # hier definierter namespace
-    }
-Jedes File startet mit Modulnamen:
-    module Math.Geometry
+```diamond
+namespace Algebra {
+    # Here is defined namespace
+}
+```
+* Each file starts with it's Modulname:
+```diamond
+module Math.Geometry
+```
 In Verzeichnis Math/Geometry.dmd
 Packages mit 
 import package_name.module
