@@ -58,7 +58,7 @@ fn identity<T> : T = (val : T) {
 }
 ```
 
-*Interface with Default-Implementation
+* Interface with Default-Implementation
 ```diamond
 interface Printable {
     fn println : void = () {
@@ -70,9 +70,10 @@ interface Printable {
 * Components combine fields and methods
 
 * Components implement Interfaces
+```diamond
 Comp Document implements Printable {
     fn println : void = () {
         print("overridden");
     }
 }
-
+```
