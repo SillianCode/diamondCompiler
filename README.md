@@ -2,10 +2,14 @@
 (*.dmd*)
 
 Compiler for the diamond lang, a compiled statically typed general purpose language.
-Diamond tries to ensure low-level access while remaining abstract enough for prototyping.
+Diamond will focus on safe parallel execution in the future. 
+It is (currently) compiled to x86_64 assembly.
+
 
 ## functionality 
 
-for an example see the *tests* folder.
+Examples are in the *tests* folder.
 
 ## upcoming
+
+* more data-types
