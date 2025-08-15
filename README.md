@@ -13,3 +13,6 @@ Examples are in the *tests* folder.
 ## upcoming
 
 * more data-types
+* interfaces 
+* components
+* generic functions
