@@ -5,7 +5,7 @@ Compiler for the diamond lang, a compiled statically typed general purpose langu
 Diamond will focus on safe and fast parallel execution in the future. 
 It is (currently) compiled to x86_64 assembly.
 
-I am always looking for new (or better) features to include. _Feel free to contribute!!_
+I am always looking for new (or better) features to include. **Feel free to contribute!!**
 
 
 ## functionality 
