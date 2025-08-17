@@ -39,7 +39,7 @@ namespace Algebra {
 ```
 
 
-## later on
+## future ideas
 > Neither fixed syntactically nor content-wise!
 
 * async/await (just on immutable data)
@@ -92,7 +92,7 @@ interface Printable {
 }
 ```
 
-* Components combine fields and methods, but are not accessable from outside itself (structs are).
+* Components combine fields and methods, but are not accessible from outside itself (structs are).
 Components implement Interfaces:
 ```diamond
 Comp Document implements Printable {
