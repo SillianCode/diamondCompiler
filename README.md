@@ -18,10 +18,18 @@ Examples are in the *tests* folder.
 * interfaces 
 * components
 * generic functions
+* Each file starts with it's Modulname:
+```diamond
+# e.g. in directory Math/Geometry.dmd
+module Math.Geometry
+```
+
 
 ## later on
 
 * async/await (just on immutable data)
+* parallel loops
+* threads
 * Pattern matching
 * Option types
 * define types with 
@@ -39,12 +47,6 @@ and
 namespace Algebra {
     # Here is defined namespace
 }
-```
-
-* Each file starts with it's Modulname:
-```diamond
-# e.g. in directory Math/Geometry.dmd
-module Math.Geometry
 ```
 
 * Packages with
