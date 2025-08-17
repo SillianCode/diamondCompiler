@@ -15,29 +15,18 @@ Examples are in the *tests* folder.
 ## upcoming
 
 * more data-types
-* interfaces 
-* components
-* generic functions
+* structs holding data
+```diamond
+struct rect {
+    width :int32,
+    height :int32
+}
+```
 * Each file starts with it's Modulname:
 ```diamond
 # e.g. in directory Math/Geometry.dmd
 module Math.Geometry
 ```
-
-
-## later on
-
-* async/await (just on immutable data)
-* parallel loops
-* threads
-* Pattern matching
-* Option types
-* define types with 
-```diamond
-# union
-type t = some(int) | none(int);
-```
-
 * Module and Namespaces:
 ```diamond
 use Math.Geometry as Geo;
@@ -47,6 +36,38 @@ and
 namespace Algebra {
     # Here is defined namespace
 }
+```
+
+
+## later on
+> Neither fixed syntactically nor content-wise!
+
+* async/await (just on immutable data)
+* mutable variables
+```diamond
+mut x :int32 = 100;
+x = x + 10; 
+
+```
+* (parallel) loops
+```diamond
+
+for i to 20 {
+    # do smth.
+}
+
+parallel for j to 10 {
+    # do smth.
+}
+
+```
+* threads
+* Pattern matching
+* Option types
+* define types with 
+```diamond
+# union
+type t = some(int) | none(int);
 ```
 
 * Packages with
@@ -70,15 +91,6 @@ interface Printable {
     }
 }
 ```
-
-* Records/structs holding data
-```diamond
-struct rect {
-    width :int32,
-    height :int32
-}
-```
-
 
 * Components combine fields and methods, but are not accessable from outside itself (structs are).
 Components implement Interfaces:
