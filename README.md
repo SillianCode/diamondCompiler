@@ -14,7 +14,7 @@ Examples are in the *tests* folder.
 
 ## upcoming
 
-* more data-types
+* implementations of more basic data-types
 * structs holding data
 ```diamond
 struct rect {
