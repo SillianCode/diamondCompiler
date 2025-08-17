@@ -76,7 +76,7 @@ struct rect {
 ```
 
 
-* Components combine fields and methods, but are not accessable from outside itself (structs can).
+* Components combine fields and methods, but are not accessable from outside itself (structs are).
 
 * Components implement Interfaces
 ```diamond
