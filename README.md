@@ -104,8 +104,16 @@ Comp Document implements Printable {
 
 * Generators
 ```diamond
-Generator !square :int32 = (x : int32) {
+Generator !times2 :int32 = (x : int32) {
+    !init x, 1
+    !typelimit x 
     out 2*x;
+}
+# the ! symbolises the Generator-Type and is used # for specifications inside it's bodies as well.
+
+fn main :void = {
+    x :int32 = !times2; # init is used cause no param is specified
+    y :int32 = !times2(x);
 }
 
 ```
