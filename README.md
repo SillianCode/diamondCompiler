@@ -101,6 +101,14 @@ Comp Document implements Printable {
     }
 }
 ```
+
+* Generators
+```diamond
+Generator !square :int32 = (x : int32) {
+    out 2*x;
+}
+
+```
 * Channels 
 * Atomic types
 * STM
